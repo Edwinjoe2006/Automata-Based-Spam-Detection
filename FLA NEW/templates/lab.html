@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Automata Laboratory &bull; 10 JFLAP Experiments{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <div class="academic-tag">Formal Language and Automata &bull; 21CSC301T</div>
+    <h1>Automata Laboratory (10 Formal Experiments)</h1>
+    <p class="hero-desc">
+        Explore the 10 formal automata models designed for email pattern recognition. 
+        Each experiment features its mathematical language definition, regular expression, transition table, 
+        accepted/rejected test inputs, and downloadable <code>.jff</code> files for simulation in JFLAP 7.1.
+    </p>
+</section>
+
+<!-- Experiments Navigation Tabs -->
+<div class="lab-tabs">
+    {% for exp in experiments %}
+    <button class="tab-btn {% if loop.first %}active{% endif %}" onclick="openTab(event, 'tab-{{ exp.id }}')">
+        {{ exp.id }} &bull; {{ exp.name|truncate(18) }}
+    </button>
+    {% endfor %}
+</div>
+
+<!-- Experiments Content Panes -->
+{% for exp in experiments %}
+<div id="tab-{{ exp.id }}" class="tab-pane {% if loop.first %}active{% endif %}">
+    <section class="card">
+        <div class="section-header">
+            <div>
+                <span class="badge badge-accent">{{ exp.id }} Experiment</span>
+                <h2>{{ exp.name }}</h2>
+                <p class="subtitle">{{ exp.problem_statement }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('download_jff', filename=exp.jff_file) }}" class="btn btn-primary">
+                    Download {{ exp.jff_file }} &darr;
+                </a>
+            </div>
+        </div>
+
+        <div class="experiment-details-grid">
+            <div class="detail-card">
+                <h3>Formal Language & Mathematical Grammar</h3>
+                <ul>
+                    <li><strong>Language:</strong> <code>{{ exp.formal_language }}</code></li>
+                    <li><strong>Alphabet (&Sigma;):</strong> <code>{{ exp.alphabet }}</code></li>
+                    <li><strong>Regular Expression (r):</strong> <code>{{ exp.regex }}</code></li>
+                    <li><strong>Automata Type:</strong> <span class="badge badge-info">{{ exp.automata_type }}</span></li>
+                </ul>
+            </div>
+
+            <div class="detail-card">
+                <h3>Finite State Machine (5-Tuple)</h3>
+                <ul>
+                    <li><strong>States (Q):</strong> { {{ exp.states|join(', ') }} }</li>
+                    <li><strong>Initial State (q0):</strong> <code>{{ exp.initial_state }}</code></li>
+                    <li><strong>Accepting States (F):</strong> { {{ exp.accepting_states|join(', ') }} }</li>
+                    <li><strong>Total States:</strong> {{ exp.states|length }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Transition Table -->
+        <h3 style="margin-top: 1.5rem;">State Transition Table &delta;(q, a)</h3>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Current State (q)</th>
+                        <th>Input Symbol (a &isin; &Sigma;)</th>
+                        <th>Next State &delta;(q, a)</th>
+                        <th>Is Accepting?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in exp.transitions %}
+                    <tr>
+                        <td><strong>{{ t[0] }}</strong></td>
+                        <td><span class="symbol-pill">{{ t[1] }}</span></td>
+                        <td><strong>{{ t[2] }}</strong></td>
+                        <td>
+                            {% if t[2] in exp.accepting_states %}
+                                <span class="badge badge-success">Accepting (&isin; F)</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Non-accepting</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Accepted vs Rejected Test Strings -->
+        <div class="strings-comparison-grid" style="margin-top: 1.5rem;">
+            <div class="strings-col spam-col">
+                <h4>Accepted Test Inputs (&isin; L)</h4>
+                <ul class="example-list">
+                    {% for item in exp.accepted_test_inputs %}
+                        <li><span class="bullet-pass">&check;</span> "{{ item }}"</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="strings-col ham-col">
+                <h4>Rejected Test Inputs (&notin; L)</h4>
+                <ul class="example-list">
+                    {% for item in exp.rejected_test_inputs %}
+                        <li><span class="bullet-fail">&cross;</span> "{{ item }}"</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- JFLAP Execution Guide -->
+        <div class="jflap-guide-box" style="margin-top: 1.5rem;">
+            <h4>How to Test in JFLAP:</h4>
+            <p>{{ exp.jflap_instructions }}</p>
+            <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                *Note: You can open the downloaded <code>{{ exp.jff_file }}</code> in JFLAP and use <strong>Input &rarr; Fast Run</strong> or <strong>Input &rarr; Step with State</strong>.
+            </p>
+        </div>
+    </section>
+</div>
+{% endfor %}
+
+<script>
+    function openTab(evt, tabId) {
+        var panes = document.getElementsByClassName("tab-pane");
+        for (var i = 0; i < panes.length; i++) {
+            panes[i].classList.remove("active");
+        }
+        var btns = document.getElementsByClassName("tab-btn");
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.remove("active");
+        }
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %}

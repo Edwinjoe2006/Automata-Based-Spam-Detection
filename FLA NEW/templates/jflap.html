@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JFLAP Guide & Automata Theory &bull; FLA Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-badge">FLA Project</span>
+                <span class="logo-title">Spam Automata</span>
+            </div>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('analyze') }}">Spam Detection</a>
+                <a href="{{ url_for('jflap') }}" class="active">JFLAP & Theory</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Hero section for JFLAP -->
+        <section class="hero-card">
+            <div class="academic-tag">JFLAP 7.1 Integration &bull; Formal Language Specifications</div>
+            <h1>JFLAP Automata Models & Specifications</h1>
+            <p class="hero-desc">
+                This project is built directly for <strong>JFLAP</strong>. Both the <strong>NFA</strong> and <strong>DFA</strong> 
+                models are pre-saved as ready-to-open <code>.jff</code> files inside the <code>jflap/</code> folder, 
+                and can also be recreated manually in JFLAP using the 7 simple steps below.
+            </p>
+        </section>
+
+        <!-- Quick How to Open in JFLAP -->
+        <section class="card jflap-guide-card">
+            <h2>How to Open & Run in JFLAP (Instant Method)</h2>
+            <div class="steps-list">
+                <div class="step-item">
+                    <span class="step-badge">1</span>
+                    <div>
+                        <strong>Launch JFLAP:</strong>
+                        <p>Go to your project's <code>jflap/</code> folder and double-click <code>JFLAP7.1.jar</code> (or run <code>java -jar jflap/JFLAP7.1.jar</code> in terminal).</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-badge">2</span>
+                    <div>
+                        <strong>Open the Automaton:</strong>
+                        <p>In the JFLAP menu bar, click <strong>File &rarr; Open</strong>, then select:</p>
+                        <ul>
+                            <li><code>jflap/spam_nfa.jff</code> &mdash; for the Non-deterministic Finite Automaton</li>
+                            <li><code>jflap/spam_dfa.jff</code> &mdash; for the Deterministic Finite Automaton</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-badge">3</span>
+                    <div>
+                        <strong>Simulate Strings:</strong>
+                        <p>Click <strong>Input &rarr; Step with State...</strong> or <strong>Input &rarr; Fast Run...</strong> and test strings like <code>W F P</code> (Accepted &rarr; Spam) or <code>F</code> (Rejected &rarr; Ham).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step-by-Step Manual Recreation Guide -->
+        <section class="card">
+            <h2>Manual JFLAP Creation Guide (For College Viva & Lab)</h2>
+            <ol class="ordered-steps">
+                <li><strong>Open JFLAP:</strong> Launch JFLAP and click <em>Finite Automaton</em> from the startup menu.</li>
+                <li><strong>Create States:</strong> Select the state creation tool (circle icon) and click on the canvas to create 3 states: <code>q0</code>, <code>q1</code>, and <code>q2</code> (or <code>S0</code>, <code>S1</code>, <code>S2</code>).</li>
+                <li><strong>Mark Initial State:</strong> Switch to the arrow tool, right-click on <code>q0</code> (or <code>S0</code>), and check <strong>Initial</strong>.</li>
+                <li><strong>Mark Final State:</strong> Right-click on <code>q2</code> (or <code>S2</code>), and check <strong>Final</strong>.</li>
+                <li><strong>Add Transitions:</strong>
+                    Select the transition tool (arrow icon) and draw transitions for each symbol in &Sigma; = {F, W, P, O, U, C, K, B}:
+                    <ul>
+                        <li>From <code>q0 &rarr; q1</code> on F, W, P, O, U, C, K, B</li>
+                        <li>From <code>q1 &rarr; q2</code> on F, W, P, O, U, C, K, B</li>
+                        <li>Self-loop on <code>q2 &rarr; q2</code> on F, W, P, O, U, C, K, B</li>
+                    </ul>
+                </li>
+                <li><strong>Convert NFA to DFA inside JFLAP:</strong> Go to <strong>Convert &rarr; Convert to DFA</strong> in the JFLAP menu to view JFLAP's internal subset construction!</li>
+                <li><strong>Test Strings:</strong> Go to <strong>Input &rarr; Multiple Run</strong> to test accepted vs rejected strings.</li>
+            </ol>
+        </section>
+
+        <!-- Formal Model Definition -->
+        <section class="card">
+            <h2>Formal Mathematical Definitions (5-Tuple)</h2>
+            <div class="tuples-grid">
+                <div class="tuple-box">
+                    <h3>NFA Definition M = (Q, &Sigma;, &delta;, q0, F)</h3>
+                    <ul>
+                        <li><strong>States (Q):</strong> { q0, q1, q2 }</li>
+                        <li><strong>Alphabet (&Sigma;):</strong> { F, W, P, O, U, C, K, B }</li>
+                        <li><strong>Initial State (q0):</strong> q0</li>
+                        <li><strong>Final States (F):</strong> { q2 }</li>
+                        <li><strong>Language Recognized:</strong> L = { w &in; &Sigma;* | |w| &ge; 2 }</li>
+                        <li><strong>Regular Expression:</strong> r = &Sigma; &Sigma; &Sigma;*</li>
+                    </ul>
+                </div>
+
+                <div class="tuple-box">
+                    <h3>DFA Definition M' = (Q', &Sigma;, &delta;', S0, F')</h3>
+                    <ul>
+                        <li><strong>DFA States (Q'):</strong> { S0, S1, S2 } where S0={q0}, S1={q1}, S2={q2}</li>
+                        <li><strong>Alphabet (&Sigma;):</strong> { F, W, P, O, U, C, K, B }</li>
+                        <li><strong>Initial State:</strong> S0</li>
+                        <li><strong>Final States (F'):</strong> { S2 } (Accepted &implies; SPAM)</li>
+                        <li><strong>Non-Final States:</strong> { S0, S1 } (Rejected &implies; HAM)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subset Construction Table -->
+        <section class="card">
+            <h2>NFA &rarr; DFA Subset Construction (Powerset Construction)</h2>
+            <p>Every NFA state subset forms a deterministic state in the DFA:</p>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>DFA State</th>
+                            <th>NFA State Subset</th>
+                            <th>Input Symbol a &in; &Sigma;</th>
+                            <th>Next DFA State</th>
+                            <th>Accepting?</th>
+                            <th>Classification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>S0</strong> (Initial)</td>
+                            <td>{ q0 }</td>
+                            <td>Any a &in; &Sigma;</td>
+                            <td>{ q1 } = <strong>S1</strong></td>
+                            <td><span class="badge-reject">No</span></td>
+                            <td>HAM (0 keywords)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>S1</strong></td>
+                            <td>{ q1 }</td>
+                            <td>Any a &in; &Sigma;</td>
+                            <td>{ q2 } = <strong>S2</strong></td>
+                            <td><span class="badge-reject">No</span></td>
+                            <td>HAM (1 keyword)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>S2</strong> (Accepting)</td>
+                            <td>{ q2 }</td>
+                            <td>Any a &in; &Sigma;</td>
+                            <td>{ q2 } = <strong>S2</strong></td>
+                            <td><span class="badge-accept">Yes</span></td>
+                            <td>SPAM (&ge;2 keywords)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Accepted vs Rejected Strings -->
+        <section class="card">
+            <h2>Accepted vs Rejected String Examples in JFLAP</h2>
+            <div class="strings-comparison-grid">
+                <div class="strings-col spam-col">
+                    <h3>Accepted Strings (SPAM &implies; Final State S2)</h3>
+                    <ul class="example-list">
+                        <li><code>W F P</code> (Length 3 &ge; 2) &rarr; "Winner Free Prize"</li>
+                        <li><code>C B</code> (Length 2 &ge; 2) &rarr; "Claim Bonus"</li>
+                        <li><code>U O W</code> (Length 3 &ge; 2) &rarr; "Urgent Offer Winner"</li>
+                        <li><code>W P C</code> (Length 3 &ge; 2) &rarr; "Winner Prize Claim"</li>
+                        <li><code>K C B</code> (Length 3 &ge; 2) &rarr; "Click Claim Bonus"</li>
+                    </ul>
+                </div>
+
+                <div class="strings-col ham-col">
+                    <h3>Rejected Strings (HAM &implies; Halted in S0 or S1)</h3>
+                    <ul class="example-list">
+                        <li><code>&epsilon;</code> (Empty string, Length 0) &rarr; No keywords detected</li>
+                        <li><code>F</code> (Length 1 &lt; 2) &rarr; Only isolated word "free"</li>
+                        <li><code>K</code> (Length 1 &lt; 2) &rarr; Only isolated word "click"</li>
+                        <li><code>O</code> (Length 1 &lt; 2) &rarr; Only isolated word "offer"</li>
+                        <li><code>U</code> (Length 1 &lt; 2) &rarr; Only isolated word "urgent"</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>B.Tech IT Academic Project &bull; Formal Languages and Automata (FLA) &bull; Verified with JFLAP</p>
+    </footer>
+</body>
+</html>

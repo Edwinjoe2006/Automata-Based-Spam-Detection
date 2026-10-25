@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Email Analyzer &bull; Automata Spam Filter{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="section-header">
+        <div>
+            <h2>Automata-Based Email Analyzer</h2>
+            <p class="subtitle">
+                Paste any email content below. The engine normalizes the text, executes 10 discrete regular expression pattern recognizers, 
+                computes a deterministic risk score, and simulates the Integrated Decision Automaton.
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Sample Buttons -->
+    <div class="sample-btn-group">
+        <span class="sample-label">Quick Test Samples:</span>
+        <button type="button" class="btn-chip spam-chip" onclick="loadSample('spam1')">Spam #1 (Prize & Bonus)</button>
+        <button type="button" class="btn-chip spam-chip" onclick="loadSample('spam2')">Spam #2 (Urgent Phish & URL)</button>
+        <button type="button" class="btn-chip spam-chip" onclick="loadSample('spam3')">Spam #3 (Exclamations & Dollars)</button>
+        <button type="button" class="btn-chip ham-chip" onclick="loadSample('ham1')">Ham #1 (Project Meeting)</button>
+        <button type="button" class="btn-chip ham-chip" onclick="loadSample('ham2')">Ham #2 (Lab Report)</button>
+        <button type="button" class="btn-chip ham-chip" onclick="loadSample('ham3')">Ham #3 (Classroom Free Slot)</button>
+    </div>
+
+    <!-- Email Input Form -->
+    <form action="{{ url_for('analyze_page') }}" method="POST" class="analyze-form">
+        <div class="form-group">
+            <label for="email_text"><strong>Email Body / Subject Text:</strong></label>
+            <textarea id="email_text" name="email_text" rows="6" placeholder="Enter or paste email text to analyze with automata rules..." required>{{ email_text }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group-inline">
+                <label for="threshold">Spam Score Threshold:</label>
+                <input type="number" id="threshold" name="threshold" value="{{ threshold|default(40) }}" min="10" max="100" step="5">
+                <span class="text-muted">(Default: 40 points)</span>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Run Automata Classification &rarr;</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+{% if result %}
+<!-- Results Section -->
+<section class="card result-card">
+    <div class="result-header">
+        <div>
+            <h2>Classification Verdict</h2>
+            <span class="text-muted">Rule-Based Deterministic Automata Engine</span>
+        </div>
+        <div class="verdict-badge verdict-{{ result.verdict.lower() }}">
+            {{ result.verdict }}
+        </div>
+    </div>
+
+    <!-- Risk Score Meter -->
+    <div class="score-meter-container">
+        <div class="score-meta">
+            <span>Risk Score: <strong>{{ result.spam_score }}</strong> pts</span>
+            <span>Threshold: <strong>{{ result.threshold }}</strong> pts</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill-{{ result.verdict.lower() }}" 
+                 style="width: {{ [((result.spam_score / (result.threshold * 2)) * 100), 100]|min }}%;"></div>
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <!-- Triggered Rules Breakdown -->
+        <div class="result-section">
+            <h3>Triggered Automata Rules ({{ result.triggered_rules|length }} Matched)</h3>
+            {% if result.triggered_rules %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Exp ID</th>
+                            <th>Pattern Name</th>
+                            <th>Formal Regex</th>
+                            <th>Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in result.triggered_rules %}
+                        <tr>
+                            <td><span class="badge badge-accent">{{ r.id }}</span></td>
+                            <td><strong>{{ r.name }}</strong></td>
+                            <td><code>{{ r.regex }}</code></td>
+                            <td>+{{ r.weight }} pts</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No suspicious automata pattern triggers were detected in this message.</p>
+            {% endif %}
+        </div>
+
+        <!-- Matched Tokens -->
+        <div class="result-section">
+            <h3>Extracted Suspicious Tokens</h3>
+            <div>
+                {% if result.matched_keywords %}
+                    {% for kw in result.matched_keywords %}
+                        <span class="tag-badge">{{ kw }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">No suspicious keyword tokens extracted.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Integrated Automaton State Trajectory -->
+        <div class="result-section">
+            <h3>Integrated Automaton State Trajectory (Exp 10)</h3>
+            <div class="trajectory-chain">
+                {% for step in result.integrated_automaton.trace %}
+                    <span class="state-node {% if step.state == 'Q_SPAM' %}accept-node{% elif step.state == 'Q_HAM' %}ham-node{% else %}active-node{% endif %}">
+                        {{ step.state }}
+                    </span>
+                    {% if not loop.last %}
+                        <span class="arrow">&rarr; [{{ step.event }}] &rarr;</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Optional ML Benchmark Comparison -->
+        {% if ml_result and not ml_result.error %}
+        <div class="result-section ml-compare-box">
+            <h3>Machine Learning Baseline Comparison (TF-IDF + Logistic Regression)</h3>
+            <div class="ml-meta-grid">
+                <div>ML Prediction: <strong>{{ ml_result.ml_prediction }}</strong></div>
+                <div>Spam Probability: <strong>{{ ml_result.spam_probability }}%</strong></div>
+                <div>Ham Probability: <strong>{{ ml_result.ham_probability }}%</strong></div>
+            </div>
+            <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                *Note: ML prediction is derived statistically and is presented solely as an academic benchmark comparison.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Linguistic Explanation -->
+        <div class="result-section">
+            <h3>Formal Linguistic Explanation</h3>
+            <div class="explanation-box">
+                {{ result.explanation }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<script>
+    const sampleEmails = {
+        spam1: "Congratulations! You won a free prize. Click here to claim your cash bonus of $5000 now!",
+        spam2: "URGENT SECURITY ALERT: Your account has been compromised. Verify your account password immediately at http://192.168.1.1/update",
+        spam3: "Exclusive offer!! You have been selected as our winner! Claim your reward now!!!! Act now.",
+        ham1: "Hi team, the project review meeting for Formal Language and Automata is scheduled for tomorrow at 10 AM in Lab 3.",
+        ham2: "Please find attached the department seminar report. Ensure all figures and transition tables are formatted properly.",
+        ham3: "Good morning class, we have a free slot available in Room 204 if anyone needs to practice JFLAP experiments."
+    };
+
+    function loadSample(key) {
+        if (sampleEmails[key]) {
+            document.getElementById('email_text').value = sampleEmails[key];
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('email_text').value = '';
+    }
+</script>
+{% endblock %}

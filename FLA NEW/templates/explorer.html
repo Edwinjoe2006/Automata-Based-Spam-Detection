@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Dataset Explorer &bull; Automata Spam Filter{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="section-header">
+        <div>
+            <h2>Dataset Explorer & Schema Validator</h2>
+            <p class="subtitle">
+                Inspect the underlying dataset, validate column headers, review label normalization, 
+                or upload a custom CSV dataset for automata-based evaluation.
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Dataset Summary Cards -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="stat-label">Active Dataset</span>
+            <span class="stat-value" style="font-size: 1.2rem;">{{ stats.file_name }}</span>
+            <span class="stat-sub">{{ stats.source }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Total Clean Records</span>
+            <span class="stat-value">{{ stats.total_records }}</span>
+            <span class="stat-sub">Validated Rows</span>
+        </div>
+        <div class="stat-box spam-box">
+            <span class="stat-label">Spam Distribution</span>
+            <span class="stat-value">{{ stats.spam_count }}</span>
+            <span class="stat-sub">{{ stats.spam_pct }}% of corpus</span>
+        </div>
+        <div class="stat-box ham-box">
+            <span class="stat-label">Ham Distribution</span>
+            <span class="stat-value">{{ stats.ham_count }}</span>
+            <span class="stat-sub">{{ stats.ham_pct }}% of corpus</span>
+        </div>
+    </div>
+</section>
+
+<!-- CSV Upload and Validation Form -->
+<section class="card">
+    <h2>Upload & Validate Custom CSV Dataset</h2>
+    <p class="subtitle">
+        Upload any labelled spam-email or spam-message CSV. The system dynamically validates the schema, checks for missing rows, 
+        and detects text and label column names automatically.
+    </p>
+
+    <form action="{{ url_for('explorer_page') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+        <div class="form-group">
+            <label for="csv_file">Select CSV File:</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload & Validate Schema &rarr;</button>
+    </form>
+
+    {% if upload_report %}
+    <div class="upload-report-box" style="margin-top: 1.5rem;">
+        <h3>Upload Validation Report</h3>
+        {% if upload_report.valid %}
+            <div class="alert alert-success">
+                <strong>Valid Schema Detected!</strong> 
+                Found text column: <code>{{ upload_report.text_column }}</code> and label column: <code>{{ upload_report.label_column }}</code>.
+            </div>
+        {% else %}
+            <div class="alert alert-danger">
+                <strong>Validation Warning:</strong> 
+                {{ upload_report.error if upload_report.error else "Could not automatically identify standard text or label columns." }}
+            </div>
+        {% endif %}
+
+        <div class="stats-grid" style="margin-top: 1rem;">
+            <div class="stat-box">
+                <span class="stat-label">Total Uploaded Rows</span>
+                <span class="stat-value">{{ upload_report.total_rows }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Missing Text Cells</span>
+                <span class="stat-value">{{ upload_report.missing_text_count }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Missing Label Cells</span>
+                <span class="stat-value">{{ upload_report.missing_label_count }}</span>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Detected CSV Columns:</h4>
+        <div class="tags-container">
+            {% for c in upload_report.columns %}
+                <span class="tag-badge">{{ c }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Dataset Records Preview -->
+<section class="card">
+    <h2>Sample Records Preview (Active Dataset)</h2>
+    <p class="subtitle">Showing first 10 normalized records with target ground-truth labels.</p>
+    
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">#</th>
+                    <th>Normalized Email Content</th>
+                    <th style="width: 120px;">Ground Truth</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in preview_rows %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="text-preview-cell">{{ row.text }}</td>
+                    <td>
+                        {% if row.label == 1 %}
+                            <span class="badge badge-danger">SPAM (1)</span>
+                        {% else %}
+                            <span class="badge badge-success">HAM (0)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

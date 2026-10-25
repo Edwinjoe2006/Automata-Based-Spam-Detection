@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &bull; Automata Spam Filter{% endblock %}
+
+{% block content %}
+<!-- Hero Card -->
+<section class="hero-card">
+    <div class="academic-tag">B.Tech IT &bull; Formal Language & Automata (21CSC301T)</div>
+    <h1>Automata-Based Email Spam Detection & Classification</h1>
+    <p class="hero-desc">
+        A deterministic, mathematically explainable spam email recognition framework utilizing 
+        <strong>Finite State Machines (FSM)</strong>, <strong>Deterministic Finite Automata (DFA)</strong>, 
+        <strong>Regular Expressions (Regex)</strong>, and <strong>JFLAP 7.1</strong>, paired with an optional 
+        TF-IDF + Logistic Regression benchmark for comparative academic evaluation.
+    </p>
+    <div class="hero-actions">
+        <a href="{{ url_for('analyze_page') }}" class="btn btn-primary">Open Email Analyzer &rarr;</a>
+        <a href="{{ url_for('lab_page') }}" class="btn btn-secondary">Explore 10 JFLAP Experiments</a>
+        <a href="{{ url_for('evaluation_page') }}" class="btn btn-outline">View Model Evaluation</a>
+    </div>
+</section>
+
+<!-- Dataset Statistics -->
+<section class="card">
+    <div class="section-header">
+        <div>
+            <h2>Verified Dataset Overview</h2>
+            <p class="subtitle">Source: <a href="{{ stats.kaggle_url if stats.kaggle_url else '#' }}" target="_blank">Kaggle (Thanh Nhan Nguyen)</a> &bull; Local File: <code>data/dataset.csv</code></p>
+        </div>
+        {% if stats.is_demo %}
+            <span class="badge badge-warning">Demo Mode Active</span>
+        {% else %}
+            <span class="badge badge-success">Live Kaggle Dataset</span>
+        {% endif %}
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="stat-label">Total Emails</span>
+            <span class="stat-value">{{ stats.total_records }}</span>
+            <span class="stat-sub">Cleaned & Normalized</span>
+        </div>
+        <div class="stat-box spam-box">
+            <span class="stat-label">Spam Records (Class 1)</span>
+            <span class="stat-value">{{ stats.spam_count }}</span>
+            <span class="stat-sub">{{ stats.spam_pct }}% of corpus</span>
+        </div>
+        <div class="stat-box ham-box">
+            <span class="stat-label">Ham Records (Class 0)</span>
+            <span class="stat-value">{{ stats.ham_count }}</span>
+            <span class="stat-sub">{{ stats.ham_pct }}% of corpus</span>
+        </div>
+        <div class="stat-box accent-box">
+            <span class="stat-label">Automata Experiments</span>
+            <span class="stat-value">10</span>
+            <span class="stat-sub">JFLAP .jff models</span>
+        </div>
+    </div>
+
+    <!-- Distribution Bar -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <span>Class Distribution Ratio</span>
+            <span>Ham: {{ stats.ham_pct }}% | Spam: {{ stats.spam_pct }}%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill-ham" style="width: {{ stats.ham_pct }}%;"></div>
+            <div class="progress-bar-fill-spam" style="width: {{ stats.spam_pct }}%;"></div>
+        </div>
+        <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot ham-dot"></span> Legitimate Ham ({{ stats.ham_pct }}%)</span>
+            <span class="legend-item"><span class="legend-dot spam-dot"></span> Malicious Spam ({{ stats.spam_pct }}%)</span>
+        </div>
+    </div>
+</section>
+
+<!-- Performance Highlight Card -->
+<section class="card">
+    <h2>Performance Summary (2,000 Held-Out Test Emails)</h2>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="stat-label">Rule-Based Automata Accuracy</span>
+            <span class="stat-value">{{ (metrics.rule_based.accuracy * 100)|round(2) }}%</span>
+            <span class="stat-sub">F1-Score: {{ (metrics.rule_based.f1_score * 100)|round(2) }}%</span>
+        </div>
+        <div class="stat-box accent-box">
+            <span class="stat-label">ML Benchmark Accuracy</span>
+            <span class="stat-value">{{ (metrics.machine_learning.accuracy * 100)|round(2) }}%</span>
+            <span class="stat-sub">TF-IDF + Logistic Regression</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Rule-Based Precision</span>
+            <span class="stat-value">{{ (metrics.rule_based.precision * 100)|round(2) }}%</span>
+            <span class="stat-sub">Low false positives</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Automata Execution Time</span>
+            <span class="stat-value">&lt; 1 ms</span>
+            <span class="stat-sub">O(N) linear scan</span>
+        </div>
+    </div>
+    <div style="margin-top: 1rem; text-align: right;">
+        <a href="{{ url_for('evaluation_page') }}" class="btn-text">View Detailed Confusion Matrix & Analysis &rarr;</a>
+    </div>
+</section>
+
+<!-- 10 Automata Experiments Overview -->
+<section class="card">
+    <h2>10 Built-in JFLAP Automata Experiments</h2>
+    <div class="experiments-summary-grid">
+        {% for exp in experiments %}
+        <div class="exp-summary-item">
+            <div class="exp-badge">{{ exp.id }}</div>
+            <div class="exp-content">
+                <h4>{{ exp.name }}</h4>
+                <p><code>{{ exp.regex }}</code></p>
+                <span class="meta-tag">{{ exp.automata_type }} &bull; {{ exp.states|length }} States</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

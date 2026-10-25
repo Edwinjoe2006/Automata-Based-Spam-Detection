@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Automata-Based Email Spam Detection{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-badge">21CSC301T</span>
+                <span class="logo-title">Automata Spam Filter</span>
+            </div>
+            <nav class="nav-links">
+                <a href="{{ url_for('dashboard') }}" class="{% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('analyze_page') }}" class="{% if active_page == 'analyze' %}active{% endif %}">Email Analyzer</a>
+                <a href="{{ url_for('explorer_page') }}" class="{% if active_page == 'explorer' %}active{% endif %}">Dataset Explorer</a>
+                <a href="{{ url_for('lab_page') }}" class="{% if active_page == 'lab' %}active{% endif %}">Automata Lab</a>
+                <a href="{{ url_for('evaluation_page') }}" class="{% if active_page == 'evaluation' %}active{% endif %}">Evaluation</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p><strong>B.Tech Information Technology &bull; Third Year Academic Project</strong></p>
+            <p>Course: Formal Language and Automata (21CSC301T) &bull; Verified with JFLAP 7.1</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
